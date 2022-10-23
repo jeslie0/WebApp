@@ -3,3 +3,39 @@
 
 * What is this?
 This project is my first dive into a web app. I am starting off by writing a small naughts and crosses game in React, which will talk to a haskell programme I made earlier to play against other people, or a computer.
+
+* Building
+Currently, each part of the project can only be built separately. Everything can be built with nix:
+#+begin_src sh
+nix build .#backend
+#+end_src
+or with cabal:
+#+begin_src sh
+cabal build Backend
+#+end_src
+The frontend isn't fully developed yet, but can the source code can be built with nix:
+#+begin_src sh
+nix build .#frontend
+#+end_src
+Then host a web server from =result/build/=. Alternatively, one can use npm to build the front end with
+#+begin_src bash
+npm run build
+#+end_src
+
+* Development
+The Haskell backend development is well integrated into nix. Just run
+#+begin_src bash
+nix develop
+#+end_src
+to get all the haskell resources. This will give some frontend tools also (append the above command with =.#backend= for just a haskell environment). The frontend is less integrated into nix. To develop, use the default or frontend development shell, then run the following:
+#+begin_src bash
+cd src/site; # Go to frontend directory,
+npm install; # Download the dependencies using npm,
+npm run start; # Start a development server.
+#+end_src
+
+* Updating frontend dependencies
+If the frontend's =packages.json= or =package-lock.json= get updated, the corresponding nix files also need to be updated. Run the following command to update them:
+#+begin_src bash
+node2nix -l package-lock.json -18
+#+end_src

@@ -12,29 +12,43 @@
         pkgs = nixpkgs.legacyPackages.${system};
         haskellPackages = pkgs.haskellPackages;
         packageName = "WebApp";
+        frontendFiles = pkgs.stdenv.mkDerivation {
+          pname = "frontend";
+          version = "0.0.1";
+          src = (import ./src/site/default.nix {pkgs = pkgs;}).package;
+          buildInputs = [ pkgs.nodePackages.npm ];
+          buildPhase = ''
+                       cd lib/node_modules/frontend;
+                       npm run build;
+                       '';
+          installPhase = ''
+                         mkdir -p $out
+                         mv build $out
+                         '';
+        };
       in
         {
           packages = {
             backend = haskellPackages.callCabal2nixWithOptions "Backend" src/app "" {};
-            frontend = (import ./src/site/default.nix {pkgs = pkgs;}).package;
+            frontend = frontendFiles;
           };
 
-          # defaultPackage = self.packages.${system}.frontend;
+          defaultPackage = self.packages.${system}.backend;
 
           devShells = rec {
             backend = haskellPackages.shellFor {
               packages = p: [ self.packages.${system}.backend ];
-              buildInputs = with haskellPackages; [ ghc
-                                                    haskell-language-server
-                                                    cabal-install
-                                                    apply-refact
-                                                    hlint
-                                                    stylish-haskell
-                                                    hasktags
-                                                    hindent
-                                                  ];
-
               withHoogle = true;
+              buildInputs = with haskellPackages;
+                [ ghc
+                  haskell-language-server
+                  cabal-install
+                  apply-refact
+                  hlint
+                  stylish-haskell
+                  hasktags
+                  hindent
+                ];
             };
 
             frontend = pkgs.mkShell {
@@ -48,8 +62,6 @@
                 nodePackages.create-react-app
               ];
             };
-
-              # ((import src/site/default.nix) {inherit pkgs system; nodejs = pkgs.nodejs-18_x; }).shell;
 
             default = pkgs.mkShell {
               inputsFrom = [ backend frontend ];
