@@ -1,0 +1,5 @@
+#+title: ReadMe
+#+author: James Leslie
+
+* What is this?
+This project is my first dive into a web app. I am starting off by writing a small naughts and crosses game in React, which will talk to a haskell programme I made earlier to play against other people, or a computer.
